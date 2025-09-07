@@ -1,1 +1,40 @@
+#Github-Actions
+name : AWS infra by Terraform deployed by Github Actions
+run-name : ${{ git-actor }} has triggred the pipeline
+on:
+  push:
+    branches:
+      - 'main'
 
+env:
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  build-infra:
+    name: github-actions-terraform-ci-cd
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout Code
+          uses: actions/checkout@v2
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v2
+        - name: Terraform Initilization
+          id: init
+          run: terraform init
+          working-directory: ./GithubActions-Practice
+
+        - name: Terraform Validate
+          id: validate
+          run: terraform validate
+          working-directory: ./GithubActions-Practice
+        
+        - name: Terraform Plan
+          id: plan
+          run: terraform plan
+          working-directory: ./GithubActions-Practice
+        
+        - name: Terraform Apply
+          id: apply
+          run: terraform apply
+          working-directory: ./GithubActions-Practice
