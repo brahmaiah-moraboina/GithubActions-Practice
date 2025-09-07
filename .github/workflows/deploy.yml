@@ -1,6 +1,6 @@
 #Github-Actions
 name : AWS infra by Terraform deployed by Github Actions
-run-name : ${{ git-actor }} has triggred the pipeline
+
 on:
   push:
     branches:
