@@ -8,46 +8,39 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  terraform-plan:
+  plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Terraform Init
-        run: terraform init
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v2
+      - run: terraform init
         working-directory: ./GithubActions-Practice
-
-      - name: Terraform Validate
-        run: terraform validate
+      - run: terraform validate
         working-directory: ./GithubActions-Practice
-
-      - name: Terraform Plan
-        run: terraform plan -input=false -out=tfplan.out
+      - run: terraform plan -out=tfplan.out -input=false
         working-directory: ./GithubActions-Practice
+      - name: Upload plan file
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: ./GithubActions-Practice/tfplan.out
 
-  terraform-apply:
-    name: Terraform Apply (Needs Approval)
-    needs: terraform-plan
+  apply:
+    name: Terraform Apply (Requires Approval)
     runs-on: ubuntu-latest
+    needs: plan
     environment:
-      name: dev   # 👈 Hardcoded to dev environment
+      name: dev  # This triggers approval UI
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Terraform Init
-        run: terraform init
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v2
+      - name: Download plan file
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan
+          path: ./GithubActions-Practice
+      - run: terraform init
         working-directory: ./GithubActions-Practice
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan.out
+      - run: terraform apply -auto-approve ./tfplan.out
         working-directory: ./GithubActions-Practice
