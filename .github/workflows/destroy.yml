@@ -1,7 +1,10 @@
 name: AWS Infra Destroy by Terraform
 
 on:
-  workflow_dispatch:  # Trigger manually from GitHub Actions UI
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 env:
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
