@@ -3,27 +3,51 @@ name: Terraform Deploy
 on:
   workflow_dispatch:
 
+env:
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
 jobs:
   terraform-plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: hashicorp/setup-terraform@v2
-      - run: terraform init
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
         working-directory: ./GithubActions-Practice
-      - run: terraform validate
+
+      - name: Terraform Validate
+        run: terraform validate
         working-directory: ./GithubActions-Practice
-      - run: terraform plan
+
+      - name: Terraform Plan (shows output in logs)
+        run: terraform plan
         working-directory: ./GithubActions-Practice
 
   terraform-apply:
+    name: Terraform Apply
     needs: terraform-plan
     runs-on: ubuntu-latest
-    environment: production   # <-- must be configured in GitHub with required reviewers for manual approval UI
+    environment: production   # This triggers the manual approval UI in GitHub
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: hashicorp/setup-terraform@v2
-      - run: terraform init
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
         working-directory: ./GithubActions-Practice
-      - run: terraform apply -auto-approve
+
+      - name: Terraform Apply (after manual approval)
+        run: terraform apply -auto-approve
         working-directory: ./GithubActions-Practice
