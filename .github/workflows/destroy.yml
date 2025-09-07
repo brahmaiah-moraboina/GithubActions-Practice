@@ -1,4 +1,4 @@
-name: Terraform Destroy (dev)
+name: Terraform Destroy
 
 on:
   workflow_dispatch:
@@ -8,8 +8,8 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  terraform-plan:
-    name: Terraform Destroy Plan
+  terraform-plan-destroy:
+    name: Terraform Plan Destroy
     runs-on: ubuntu-latest
 
     steps:
@@ -27,16 +27,16 @@ jobs:
         run: terraform validate
         working-directory: ./GithubActions-Practice
 
-      - name: Terraform Destroy Plan
-        run: terraform plan -destroy -input=false -out=destroy.out
+      - name: Terraform Plan Destroy (shows resources to be destroyed)
+        run: terraform plan -destroy
         working-directory: ./GithubActions-Practice
 
   terraform-destroy:
-    name: Terraform Destroy (Needs Approval)
-    needs: terraform-plan
+    name: Terraform Destroy Apply
+    needs: terraform-plan-destroy
     runs-on: ubuntu-latest
-    environment:
-      name: dev   # 👈 Hardcoded to dev environment
+    environment: production  # Must be protected with required reviewers for approval
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -48,6 +48,6 @@ jobs:
         run: terraform init
         working-directory: ./GithubActions-Practice
 
-      - name: Terraform Destroy
-        run: terraform apply -auto-approve destroy.out
+      - name: Terraform Destroy (after manual approval)
+        run: terraform destroy -auto-approve
         working-directory: ./GithubActions-Practice
