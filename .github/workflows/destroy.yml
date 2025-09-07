@@ -1,0 +1,27 @@
+name: AWS Infra Destroy by Terraform
+
+on:
+  workflow_dispatch:  # Trigger manually from GitHub Actions UI
+
+env:
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  destroy-infra:
+    name: Destroy Terraform Infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./GithubActions-Practice
+
+      - name: Terraform Destroy
+        run: terraform destroy --auto-approve
+        working-directory: ./GithubActions-Practice
