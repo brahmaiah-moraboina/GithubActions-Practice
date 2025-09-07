@@ -1,20 +1,42 @@
-#Aws Destroy Pipeline
-name: AWS Infra Destroy by Terraform
+name: Terraform Destroy (dev)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 env:
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  destroy-infra:
-    name: Destroy Terraform Infrastructure
+  terraform-plan:
+    name: Terraform Destroy Plan
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./GithubActions-Practice
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ./GithubActions-Practice
+
+      - name: Terraform Destroy Plan
+        run: terraform plan -destroy -input=false -out=destroy.out
+        working-directory: ./GithubActions-Practice
+
+  terraform-destroy:
+    name: Terraform Destroy (Needs Approval)
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    environment:
+      name: dev   # 👈 Hardcoded to dev environment
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -27,5 +49,5 @@ jobs:
         working-directory: ./GithubActions-Practice
 
       - name: Terraform Destroy
-        run: terraform destroy --auto-approve
+        run: terraform apply -auto-approve destroy.out
         working-directory: ./GithubActions-Practice
