@@ -35,6 +35,7 @@ jobs:
     name: Terraform Apply
     needs: terraform-plan
     runs-on: ubuntu-latest
+    environment: production   # <- This triggers the manual approval UI
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
